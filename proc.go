@@ -4,6 +4,7 @@ package procspy
 
 import (
 	"bytes"
+	"fmt"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -17,6 +18,18 @@ var (
 // SetProcRoot sets the location of the proc filesystem.
 func SetProcRoot(root string) {
 	procRoot = root
+}
+
+// Find the inode of proc's /ns/net namespace
+func NsNetInode(pid uint64) (ino uint64, err error) {
+	var stat syscall.Stat_t
+	pidStr := fmt.Sprintf("%v", pid)
+	err = syscall.Stat(filepath.Join("/proc", pidStr, "/ns/net"), &stat)
+	if err != nil {
+		return
+	}
+	ino = stat.Ino
+	return
 }
 
 // walkProcPid walks over all numerical (PID) /proc entries, and sees if their
@@ -61,10 +74,11 @@ func walkProcPid(buf *bytes.Buffer) (map[uint64]Proc, error) {
 
 		// Read network namespace, and if we haven't seen it before,
 		// read /proc/<pid>/net/tcp
-		err = syscall.Lstat(filepath.Join(procRoot, dirName, "/ns/net"), &stat)
+		err = syscall.Stat(filepath.Join(procRoot, dirName, "/ns/net"), &stat)
 		if err != nil {
 			continue
 		}
+		nsNetInode := stat.Ino
 
 		if _, ok := namespaces[stat.Ino]; !ok {
 			namespaces[stat.Ino] = struct{}{}
@@ -93,8 +107,9 @@ func walkProcPid(buf *bytes.Buffer) (map[uint64]Proc, error) {
 			}
 
 			res[stat.Ino] = Proc{
-				PID:  uint(pid),
-				Name: name,
+				PID:        uint(pid),
+				Name:       name,
+				NsNetInode: nsNetInode,
 			}
 		}
 	}

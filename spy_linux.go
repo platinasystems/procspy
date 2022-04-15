@@ -12,9 +12,10 @@ var bufPool = sync.Pool{
 }
 
 type pnConnIter struct {
-	pn    *ProcNet
-	buf   *bytes.Buffer
-	procs map[uint64]Proc
+	transport string
+	pn        *ProcNet
+	buf       *bytes.Buffer
+	procs     map[uint64]Proc
 }
 
 func (c *pnConnIter) Next() *Connection {
@@ -24,14 +25,15 @@ func (c *pnConnIter) Next() *Connection {
 		bufPool.Put(c.buf)
 		return nil
 	}
-	if proc, ok := c.procs[n.inode]; ok {
+	if proc, ok := c.procs[n.Inode]; ok {
 		n.Proc = proc
 	}
+	n.Transport = c.transport
 	return n
 }
 
 // cbConnections sets Connections()
-var cbConnections = func(processes bool) (ConnIter, error) {
+var cbConnections = func(processes bool, state uint) (ConnIter, error) {
 	// buffer for contents of /proc/<pid>/net/tcp
 	buf := bufPool.Get().(*bytes.Buffer)
 	buf.Reset()
@@ -50,8 +52,9 @@ var cbConnections = func(processes bool) (ConnIter, error) {
 	}
 
 	return &pnConnIter{
-		pn:    NewProcNet(buf.Bytes(), tcpEstablished),
-		buf:   buf,
-		procs: procs,
+		transport: TcpTransport,
+		pn:        NewProcNet(buf.Bytes(), state),
+		buf:       buf,
+		procs:     procs,
 	}, nil
 }
