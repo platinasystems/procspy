@@ -3,11 +3,11 @@ package main
 import (
 	"fmt"
 
-	"github.com/weaveworks/procspy"
+	"github.com/platinasystems/procspy"
 )
 
 func main() {
-	cs, err := procspy.Connections(true)
+	cs, err := procspy.Connections(true, procspy.TcpEstablished)
 	if err != nil {
 		panic(err)
 	}

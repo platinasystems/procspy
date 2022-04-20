@@ -22,7 +22,7 @@ Usage:
 Only list the connections:
 
 ```
-cs, err := procspy.Connections(false)
+cs, err := procspy.Connections(false, procspy.TcpEstablished)
 for c := cs.Next(); c != nil; c = cs.Next() {
     ...
 }
@@ -31,7 +31,7 @@ for c := cs.Next(); c != nil; c = cs.Next() {
 List the connections and try to find the owning process:
 
 ```
-cs, err := procspy.Connections(true)
+cs, err := procspy.Connections(true, procspy.TcpEstablished)
 for c := cs.Next(); c != nil; c = cs.Next() {
     ...
 }
@@ -46,12 +46,12 @@ package main
 import (
 	"fmt"
 
-	"github.com/weaveworks/procspy"
+	"github.com/platinasystems/procspy"
 )
 
 func main() {
 	lookupProcesses := true
-	cs, err := procspy.Connections(lookupProcesses)
+	cs, err := procspy.Connections(lookupProcesses, procspy.TcpEstablished)
 	if err != nil {
 		panic(err)
 	}

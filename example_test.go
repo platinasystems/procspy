@@ -3,12 +3,12 @@ package procspy_test
 import (
 	"fmt"
 
-	"github.com/weaveworks/procspy"
+	"github.com/platinasystems/procspy"
 )
 
 func Example() {
 	lookupProcesses := true
-	cs, err := procspy.Connections(lookupProcesses)
+	cs, err := procspy.Connections(lookupProcesses, procspy.TcpEstablished)
 	if err != nil {
 		panic(err)
 	}

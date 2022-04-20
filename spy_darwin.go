@@ -14,7 +14,7 @@ const (
 // Connections returns all established (TCP) connections. No need to be root
 // to run this. If processes is true it also tries to fill in the process
 // fields of the connection. You need to be root to find all processes.
-var cbConnections = func(processes bool) (ConnIter, error) {
+var cbConnections = func(processes bool, state uint) (ConnIter, error) {
 	out, err := exec.Command(
 		netstatBinary,
 		"-n", // no number resolving

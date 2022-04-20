@@ -68,6 +68,9 @@ func parseLSOF(out string) (map[string]Proc, error) {
 		case 'c':
 			cp.Name = value
 
+		case 'f':
+			// ignore
+
 		default:
 			return nil, fmt.Errorf("unexpected lsof field: %c in %#v", field, value)
 		}
